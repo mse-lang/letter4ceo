@@ -48,7 +48,7 @@ export default async function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[85vh] min-h-[800px] flex items-center justify-center overflow-hidden pb-32">
         {/* Background Image with improved overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center z-0 transform scale-105 animate-slow-zoom" 
@@ -59,7 +59,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60 z-10"></div>
         
         {/* Content */}
-        <div className="relative z-20 text-center text-white space-y-10 px-4 max-w-4xl mx-auto mt-10">
+        <div className="relative z-20 text-center text-white space-y-10 px-4 max-w-4xl mx-auto mt-0">
           {/* Logo - Main */}
           <div className="relative w-40 md:w-56 mx-auto mb-6 animate-fade-in-up">
             <img 
@@ -83,7 +83,7 @@ export default async function HomePage() {
         </div>
         
         {/* Scroll Down Indicator */}
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 animate-bounce text-white/50">
+        <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 z-20 animate-bounce text-white/50">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
