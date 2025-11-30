@@ -15,6 +15,30 @@
 
 ---
 
+## 🌐 배포 정보
+
+### 프로덕션 URL
+- **Backend API**: https://backend.mse-fe7.workers.dev
+- **Frontend**: (Vercel 배포 후 업데이트)
+- **GitHub**: https://github.com/mse-lang/letter4ceo
+
+### API 상태 확인
+```bash
+# Health Check
+curl https://backend.mse-fe7.workers.dev/
+
+# 뉴스레터 목록
+curl https://backend.mse-fe7.workers.dev/api/newsletters
+
+# 구독자 통계
+curl https://backend.mse-fe7.workers.dev/api/subscribers/stats
+
+# Stibee 연동 상태
+curl https://backend.mse-fe7.workers.dev/api/newsletters/stibee/status
+```
+
+---
+
 ## 🏗️ 현재 아키텍처 (v2)
 
 ```
@@ -31,11 +55,14 @@
 ┌─────────────────────────────────────────────────────────────┐
 │                        Backend                               │
 │                (Hono + Cloudflare Workers)                   │
+│        https://backend.mse-fe7.workers.dev                   │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
 │  │Newsletter│ │   News   │ │Subscriber│ │    AI    │       │
 │  │   API    │ │   API    │ │   API    │ │   API    │       │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
-└─────────────────────────┬───────────────────────────────────┘
+│  └────┬─────┘ └──────────┘ └────┬─────┘ └──────────┘       │
+│       │                         │                            │
+│       └─────────────────────────┼───► Stibee API             │
+└─────────────────────────┬───────┴───────────────────────────┘
                           │
         ┌─────────────────┼─────────────────┐
         ▼                 ▼                 ▼
@@ -55,31 +82,39 @@ morning-letter-v2/
 ├── backend/                     # Hono API (Cloudflare Workers)
 │   ├── src/
 │   │   ├── index.ts            # 메인 앱 (114줄)
-│   │   ├── routes/             # API 라우트 (1,288줄)
-│   │   │   ├── newsletters.ts  # 뉴스레터 CRUD (303줄)
+│   │   ├── routes/             # API 라우트 (~1,700줄)
+│   │   │   ├── newsletters.ts  # 뉴스레터 CRUD + Stibee 발송 (~400줄)
 │   │   │   ├── news.ts         # 뉴스 관리 (325줄)
-│   │   │   ├── subscribers.ts  # 구독자 관리 (297줄)
+│   │   │   ├── subscribers.ts  # 구독자 관리 + Stibee 동기화 (~400줄)
 │   │   │   ├── ai.ts           # AI 기능 (245줄)
 │   │   │   └── upload.ts       # 이미지 업로드 (118줄)
-│   │   ├── lib/                # 유틸리티 (160줄)
+│   │   ├── lib/                # 유틸리티 (~600줄)
 │   │   │   ├── errors.ts       # 에러 처리 (128줄)
+│   │   │   ├── stibee.ts       # Stibee 클라이언트 (~400줄) ✅ NEW
 │   │   │   └── supabase.ts     # DB 클라이언트 (32줄)
 │   │   └── types/
-│   │       └── index.ts        # 타입 정의 (188줄)
+│   │       └── index.ts        # 타입 정의 (~220줄)
 │   ├── wrangler.toml           # Cloudflare 설정
-│   ├── wrangler.jsonc          # Cloudflare 설정 (주석 지원)
+│   ├── .dev.vars               # 개발 환경변수
 │   ├── supabase-schema.sql     # DB 스키마
 │   └── package.json
 │
-├── frontend/                    # Next.js 14 (Vercel)
+├── frontend/                    # Next.js 16 (Vercel)
 │   ├── src/
 │   │   ├── app/                # App Router
 │   │   │   ├── page.tsx        # 메인 페이지 (148줄)
-│   │   │   └── layout.tsx      # 레이아웃 (39줄)
+│   │   │   ├── layout.tsx      # 레이아웃 (39줄)
+│   │   │   ├── archive/        # 아카이브 페이지 ✅ NEW
+│   │   │   ├── letter/[id]/    # 편지 상세 ✅ NEW
+│   │   │   ├── unsubscribe/    # 구독 취소 ✅ NEW
+│   │   │   ├── terms/          # 이용약관 ✅ NEW
+│   │   │   ├── privacy/        # 개인정보처리방침 ✅ NEW
+│   │   │   ├── admin/          # 관리자 대시보드 ✅ NEW
+│   │   │   │   ├── page.tsx    # 대시보드
+│   │   │   │   ├── subscribers/# 구독자 관리
+│   │   │   │   └── editor/[id]/# 뉴스레터 에디터
+│   │   │   └── ...
 │   │   ├── components/         # UI 컴포넌트
-│   │   │   ├── Providers.tsx   # React Query (24줄)
-│   │   │   ├── SubscribeForm.tsx   # 구독 폼 (97줄)
-│   │   │   └── NewsletterCard.tsx  # 카드 (49줄)
 │   │   ├── lib/
 │   │   │   ├── api.ts          # API 클라이언트 (132줄)
 │   │   │   └── supabase.ts     # Supabase 클라이언트 (11줄)
@@ -93,9 +128,9 @@ morning-letter-v2/
 ```
 
 ### 총 코드 현황
-- **Backend**: 약 1,750줄 (TypeScript)
-- **Frontend**: 약 560줄 (TypeScript/React)
-- **총계**: 약 2,310줄
+- **Backend**: 약 2,150줄 (TypeScript)
+- **Frontend**: 약 2,200줄 (TypeScript/React) 
+- **총계**: 약 4,350줄
 
 ---
 
@@ -145,6 +180,7 @@ CREATE TABLE subscribers (
   company TEXT,
   position TEXT,
   stibee_id TEXT,             -- Stibee 구독자 ID
+  stibee_synced BOOLEAN DEFAULT FALSE,  -- Stibee 동기화 여부
   status TEXT DEFAULT 'active' CHECK (status IN ('active', 'unsubscribed', 'bounced')),
   privacy_agreed BOOLEAN DEFAULT FALSE,
   privacy_agreed_at TIMESTAMPTZ,
@@ -153,46 +189,13 @@ CREATE TABLE subscribers (
 );
 ```
 
-### 인덱스
-```sql
--- newsletters
-CREATE INDEX idx_newsletters_status ON newsletters(status);
-CREATE INDEX idx_newsletters_published_date ON newsletters(published_date DESC);
-CREATE INDEX idx_newsletters_scheduled_at ON newsletters(scheduled_at);
-
--- news_items
-CREATE INDEX idx_news_items_newsletter ON news_items(newsletter_id);
-CREATE INDEX idx_news_items_category ON news_items(category);
-CREATE INDEX idx_news_items_created ON news_items(created_at DESC);
-CREATE INDEX idx_news_items_selected ON news_items(is_selected) WHERE is_selected = TRUE;
-
--- subscribers
-CREATE INDEX idx_subscribers_email ON subscribers(email);
-CREATE INDEX idx_subscribers_status ON subscribers(status);
-```
-
-### Row Level Security (RLS)
-```sql
--- newsletters: 발송된 뉴스레터만 공개 읽기 가능
-CREATE POLICY "Public read newsletters" ON newsletters
-  FOR SELECT USING (status = 'sent');
-
--- news_items: 모두 읽기 가능
-CREATE POLICY "Public read news_items" ON news_items
-  FOR SELECT USING (true);
-
--- subscribers: service_role만 접근 가능
-CREATE POLICY "Service role manage subscribers" ON subscribers
-  FOR ALL USING (auth.role() = 'service_role');
-```
-
 ---
 
 ## 🔌 API 엔드포인트
 
 ### Base URL
 - **개발**: `http://localhost:8787/api`
-- **프로덕션**: `https://{project-name}.workers.dev/api`
+- **프로덕션**: `https://backend.mse-fe7.workers.dev/api`
 
 ### Newsletters API
 
@@ -205,94 +208,54 @@ CREATE POLICY "Service role manage subscribers" ON subscribers
 | DELETE | `/newsletters/:id` | 삭제 | ✅ 완료 |
 | POST | `/newsletters/:id/schedule` | 예약 발송 설정 | ✅ 완료 |
 | POST | `/newsletters/:id/cancel-schedule` | 예약 취소 | ✅ 완료 |
-| POST | `/newsletters/:id/send` | 즉시 발송 | ⚠️ 기본 구조만 |
+| POST | `/newsletters/:id/send` | Stibee로 발송 | ✅ 완료 |
+| POST | `/newsletters/:id/send-test` | 테스트 발송 | ✅ 완료 |
+| GET | `/newsletters/:id/preview` | HTML 미리보기 | ✅ 완료 |
+| GET | `/newsletters/stibee/status` | Stibee 설정 상태 | ✅ 완료 |
 | GET | `/newsletters/stats/summary` | 통계 | ✅ 완료 |
-
-### News API
-
-| Method | Endpoint | 설명 | 상태 |
-|--------|----------|------|------|
-| GET | `/news` | 목록 조회 | ✅ 완료 |
-| GET | `/news/:id` | 단일 조회 | ✅ 완료 |
-| POST | `/news` | 생성 | ✅ 완료 |
-| PUT | `/news/:id` | 수정 | ✅ 완료 |
-| DELETE | `/news/:id` | 삭제 | ✅ 완료 |
-| POST | `/news/collect` | RSS 수집 | 🔄 구현 필요 |
-| POST | `/news/:id/summarize` | AI 요약 | ✅ 완료 |
-| POST | `/news/bulk-summarize` | 일괄 AI 요약 | ✅ 완료 |
-| GET | `/news/categories` | 카테고리 목록 | ✅ 완료 |
 
 ### Subscribers API
 
 | Method | Endpoint | 설명 | 상태 |
 |--------|----------|------|------|
 | GET | `/subscribers` | 목록 조회 | ✅ 완료 |
-| GET | `/subscribers/:id` | 단일 조회 | ✅ 완료 |
-| POST | `/subscribers` | 구독 등록 | ✅ 완료 |
-| PUT | `/subscribers/:id` | 수정 | ✅ 완료 |
-| DELETE | `/subscribers/:id` | 삭제 | ✅ 완료 |
-| POST | `/subscribers/unsubscribe` | 구독 취소 | ✅ 완료 |
-| POST | `/subscribers/sync-stibee` | Stibee 동기화 | 🔄 구현 필요 |
+| POST | `/subscribers` | 구독 등록 (+ Stibee 동기화) | ✅ 완료 |
+| DELETE | `/subscribers/:id` | 삭제 (+ Stibee 동기화) | ✅ 완료 |
+| POST | `/subscribers/unsubscribe` | 구독 취소 (+ Stibee 동기화) | ✅ 완료 |
+| POST | `/subscribers/sync-stibee` | 전체 Stibee 동기화 | ✅ 완료 |
+| POST | `/subscribers/import-stibee` | Stibee에서 import | ✅ 완료 |
 | GET | `/subscribers/stats` | 통계 | ✅ 완료 |
+| GET | `/subscribers/export` | CSV 내보내기 | ✅ 완료 |
 
-### AI API
-
-| Method | Endpoint | 설명 | 상태 |
-|--------|----------|------|------|
-| POST | `/ai/generate-letter` | 아침편지 생성 | ✅ 완료 |
-| POST | `/ai/summarize` | 뉴스 요약 | ✅ 완료 |
-| POST | `/ai/generate-title` | 제목 생성 | ✅ 완료 |
-
-### Upload API
-
-| Method | Endpoint | 설명 | 상태 |
-|--------|----------|------|------|
-| POST | `/upload/image` | 이미지 업로드 | ✅ 완료 |
-| DELETE | `/upload/image` | 이미지 삭제 | ✅ 완료 |
-| POST | `/upload/optimize-url` | URL 최적화 | 🔄 구현 필요 |
+### News API / AI API / Upload API
+(기존과 동일)
 
 ---
 
 ## 🔐 환경 변수
 
-### Backend (.dev.vars)
+### Backend Secrets (Cloudflare)
 ```bash
-# Supabase
-SUPABASE_URL=https://kvbksqlpwrypspojehlb.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
-
-# Stibee 이메일
-STIBEE_API_KEY=your_api_key
-STIBEE_LIST_ID=449567
-STIBEE_SENDER_EMAIL=mse@venturesquare.net
-
-# AI APIs
-GEMINI_API_KEY=your_key
-OPENAI_API_KEY=your_key
-ANTHROPIC_API_KEY=your_key  # Optional
-
-# Cloudflare R2
-R2_PUBLIC_URL=https://pub-64497d68ae64444487a0ced1964ebe68.r2.dev
-
-# Admin
-ADMIN_EMAIL=mse@venturesquare.net
-ADMIN_PASSWORD=your_password
-
-# CORS
-CORS_ORIGIN=https://morning-letter.vercel.app
+# 설정된 9개 Secrets
+SUPABASE_URL
+SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+R2_PUBLIC_URL
+STIBEE_API_KEY
+STIBEE_LIST_ID
+STIBEE_SENDER_EMAIL
+GEMINI_API_KEY
+OPENAI_API_KEY
 ```
 
 ### Frontend (.env.local)
 ```bash
 # API
-NEXT_PUBLIC_API_URL=http://localhost:8787/api
+NEXT_PUBLIC_API_URL=https://backend.mse-fe7.workers.dev
 
 # Supabase (public)
 NEXT_PUBLIC_SUPABASE_URL=https://kvbksqlpwrypspojehlb.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
-
-# Analytics
-NEXT_PUBLIC_GA_ID=G-ZBJW59RT7F
 ```
 
 ---
@@ -304,6 +267,9 @@ NEXT_PUBLIC_GA_ID=G-ZBJW59RT7F
    - CRUD 완료
    - 예약 발송 설정/취소
    - 상태 관리 (draft/scheduled/sent)
+   - **Stibee API 발송** ✅ NEW
+   - **테스트 발송** ✅ NEW
+   - **HTML 미리보기** ✅ NEW
 
 2. **뉴스 관리**
    - CRUD 완료
@@ -314,62 +280,51 @@ NEXT_PUBLIC_GA_ID=G-ZBJW59RT7F
 3. **구독자 관리**
    - CRUD 완료
    - 구독/구독 취소
-   - 통계
+   - **Stibee 자동 동기화** ✅ NEW
+   - **Stibee에서 import** ✅ NEW
+   - CSV 내보내기
 
-4. **AI 콘텐츠**
-   - 아침편지 자동 생성
-   - 뉴스 AI 요약
-   - 제목 생성
+4. **프론트엔드 페이지**
+   - `/` - 메인 페이지
+   - `/archive` - 아카이브 ✅ NEW
+   - `/letter/[id]` - 편지 상세 ✅ NEW
+   - `/unsubscribe` - 구독 취소 ✅ NEW
+   - `/terms` - 이용약관 ✅ NEW
+   - `/privacy` - 개인정보처리방침 ✅ NEW
+   - `/admin` - 관리자 대시보드 ✅ NEW
+   - `/admin/subscribers` - 구독자 관리 ✅ NEW
+   - `/admin/editor/[id]` - 뉴스레터 에디터 ✅ NEW
 
-5. **이미지 업로드**
-   - Base64 → R2 업로드
-   - 이미지 삭제
-
-6. **에러 처리**
-   - 통합 에러 클래스
-   - 표준화된 JSON 응답
-
-### ⚠️ 부분 완료
-1. **이메일 발송** - 구조만 있음, Stibee 실제 연동 필요
-2. **RSS 뉴스 수집** - 구조만 있음, 실제 파싱 필요
-3. **인증** - 기본 admin 인증만, OAuth 미구현
+5. **Stibee 연동** ✅ NEW
+   - 구독자 추가/삭제 동기화
+   - 뉴스레터 발송
+   - 테스트 발송
+   - 상태 확인
 
 ---
 
 ## 🔧 미완료/개선 필요 사항
 
-### 🔴 High Priority
-1. **Stibee 실제 연동**
-   - 이메일 발송 API 호출
-   - 구독자 동기화
-
-2. **관리자 인증**
-   - Supabase Auth 또는 자체 JWT
-   - 보호된 라우트
-
-3. **프론트엔드 페이지**
-   - `/archive` - 아카이브 페이지
-   - `/letter/[id]` - 편지 상세
-   - `/admin` - 관리자 대시보드
-   - `/admin/editor/[id]` - 에디터
-
 ### 🟡 Medium Priority
-1. **RSS 뉴스 자동 수집**
+1. **관리자 인증 강화**
+   - 현재: 간단한 비밀번호 (sessionStorage)
+   - 권장: Supabase Auth JWT
+
+2. **RSS 뉴스 자동 수집**
    - Cron 트리거 설정
    - RSS 피드 파싱
 
-2. **이미지 최적화**
-   - WebP 변환
-   - 리사이징
+3. **WYSIWYG 에디터**
+   - 현재: textarea
+   - 권장: TipTap 또는 Lexical
 
-3. **Stibee 양방향 동기화**
-   - Webhook 수신
-   - 구독 상태 동기화
+4. **Stibee AUTO_EMAIL_URL 설정**
+   - 테스트 발송 활성화용
 
 ### 🟢 Low Priority
-1. **분석 대시보드**
-2. **A/B 테스트**
-3. **다국어 지원**
+1. 이미지 최적화 (WebP 변환)
+2. 분석 대시보드
+3. Stibee Webhook 수신
 
 ---
 
@@ -379,35 +334,15 @@ NEXT_PUBLIC_GA_ID=G-ZBJW59RT7F
 - **Project ID**: `kvbksqlpwrypspojehlb`
 - **URL**: `https://kvbksqlpwrypspojehlb.supabase.co`
 - **Region**: Northeast Asia (Seoul)
-- **테이블**: newsletters, news_items, subscribers
 
 ### Stibee
 - **List ID**: `449567`
-- **Sender**: `mse@venturesquare.net`
-- **API Docs**: https://help.stibee.com/api
+- **Sender**: `letter4ceo@letter4ceo.com`
+- **API Base**: `https://api.stibee.com/v1`
 
-### Cloudflare R2
-- **Public URL**: `https://pub-64497d68ae64444487a0ced1964ebe68.r2.dev`
-- **Bucket**: 기존 v1 bucket 공유
-
----
-
-## 🔄 v1 → v2 마이그레이션 노트
-
-### 변경된 점
-| 항목 | v1 | v2 |
-|------|----|----|
-| 아키텍처 | 모놀리식 (Hono + JSX) | 분리 (Backend + Frontend) |
-| 데이터베이스 | Cloudflare D1 (SQLite) | Supabase (PostgreSQL) |
-| 프론트엔드 | Server-side JSX | Next.js 14 (React) |
-| 인증 | 자체 해시 | Supabase Auth (예정) |
-| 상태관리 | 없음 | React Query |
-| 배포 | Cloudflare Pages | Workers + Vercel |
-
-### 마이그레이션 필요 데이터
-- newsletters 테이블 → 수동 마이그레이션 필요
-- news_items 테이블 → 수동 마이그레이션 필요
-- subscribers 테이블 → Stibee에서 import 권장
+### Cloudflare
+- **Worker**: `backend` @ `backend.mse-fe7.workers.dev`
+- **R2 Public URL**: `https://pub-64497d68ae64444487a0ced1964ebe68.r2.dev`
 
 ---
 
@@ -417,20 +352,24 @@ NEXT_PUBLIC_GA_ID=G-ZBJW59RT7F
 저는 "그만의 아침편지" v2 프로젝트를 이어서 개발하고 싶습니다.
 
 현재 상태:
-- Backend: Hono + Cloudflare Workers + Supabase (약 1,750줄)
-- Frontend: Next.js 14 + Tailwind CSS (약 560줄)
+- Backend: Hono + Cloudflare Workers + Supabase (약 2,150줄)
+- Frontend: Next.js 16 + Tailwind CSS (약 2,200줄)
 - 위치: /home/user/morning-letter-v2/
 
+배포됨:
+- Backend: https://backend.mse-fe7.workers.dev
+- GitHub: https://github.com/mse-lang/letter4ceo
+
 완료된 것:
-- 기본 API 구조 (newsletters, news, subscribers, ai, upload)
-- Supabase DB 스키마 및 연결
-- 기본 프론트엔드 컴포넌트
+- API (newsletters, news, subscribers, ai, upload)
+- Stibee 연동 (구독자 동기화, 뉴스레터 발송)
+- 프론트엔드 전체 페이지 (메인, 아카이브, 상세, 관리자)
 
 요청 사항:
 1. [구체적인 기능] 구현해주세요
 2. HANDOFF.md 문서를 참고해주세요
 
-환경 변수와 Supabase 정보는 이미 설정되어 있습니다.
+환경 변수와 외부 서비스 연동은 이미 완료되어 있습니다.
 ```
 
 ---
@@ -444,3 +383,4 @@ NEXT_PUBLIC_GA_ID=G-ZBJW59RT7F
 ---
 
 *마지막 업데이트: 2025-11-30*
+*배포 완료: Backend (Cloudflare Workers)*
