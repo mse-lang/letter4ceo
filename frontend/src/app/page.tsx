@@ -48,17 +48,13 @@ export default async function HomePage() {
         
         {/* Content */}
         <div className="relative z-20 text-center text-white space-y-8 px-4 max-w-4xl mx-auto">
-          {/* Logo Implementation (CSS) */}
-          <div className="relative w-24 h-24 mx-auto mb-10">
-            <div className="absolute inset-0 bg-[#8A373F] transform rotate-45 shadow-2xl rounded-sm flex items-center justify-center">
-               <div className="w-[90%] h-[90%] border border-white/30 flex items-center justify-center">
-                 <div className="transform -rotate-45 text-center">
-                   <div className="font-serif text-white text-xs tracking-widest mb-1 opacity-90">그만의</div>
-                   <div className="font-serif text-white font-bold text-lg tracking-widest border-b border-white/50 pb-1 mb-1">아침편지</div>
-                   <div className="font-serif text-white/70 text-[10px] tracking-widest">Dear.CEO</div>
-                 </div>
-               </div>
-            </div>
+          {/* Logo */}
+          <div className="relative w-48 mx-auto mb-10 drop-shadow-2xl">
+            <img 
+              src="/images/main-logo.png" 
+              alt="그만의 아침편지" 
+              className="w-full h-auto transform hover:scale-105 transition-transform duration-500"
+            />
           </div>
 
           <h1 className="text-4xl md:text-6xl font-playfair font-bold tracking-wide leading-tight drop-shadow-lg">
