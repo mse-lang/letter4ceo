@@ -18,8 +18,8 @@
 ## 🌐 배포 정보
 
 ### 프로덕션 URL
+- **Frontend**: https://letter4ceo.vercel.app
 - **Backend API**: https://backend.mse-fe7.workers.dev
-- **Frontend**: (Vercel 배포 후 업데이트)
 - **GitHub**: https://github.com/mse-lang/letter4ceo
 
 ### API 상태 확인
@@ -325,10 +325,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
 1. **Stibee AUTO_EMAIL_URL 설정**
    - 테스트 발송 활성화용
 
-2. **Vercel 배포**
-   - 현재: 로컬/샌드박스 빌드 확인됨
-   - 필요: Vercel 대시보드에서 GitHub 연동 배포
-
 ### 🟢 Low Priority
 1. 이미지 최적화 (WebP 변환)
 2. 분석 대시보드
@@ -395,5 +391,5 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
 ---
 
 *마지막 업데이트: 2025-11-30*
-*배포 완료: Backend (Cloudflare Workers) + Cron 트리거*
-*Vercel 배포 대기: VERCEL_DEPLOY_GUIDE.md 참조*
+*배포 완료: Backend (Cloudflare Workers) + Frontend (Vercel)*
+*상태: ✅ 운영 중 (Production Live)*

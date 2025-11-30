@@ -17,7 +17,7 @@ bucket_name = "morning-letter-images"
 
 # 환경변수 (Secrets는 wrangler secret으로 설정)
 [vars]
-CORS_ORIGIN = "https://morning-letter.vercel.app"
+CORS_ORIGIN = "https://letter4ceo.vercel.app"
 
 # wrangler secret put SUPABASE_URL
 # wrangler secret put SUPABASE_ANON_KEY
