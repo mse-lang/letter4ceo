@@ -42,8 +42,10 @@ export interface Newsletter {
   letter_body: string | null
   curator_note: string | null
   stibee_campaign_id: string | null
+  stibee_email_id: string | null
   status: 'draft' | 'sent' | 'scheduled'
   scheduled_at: string | null
+  sent_at: string | null
   created_at: string
   updated_at: string
 }

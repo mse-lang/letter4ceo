@@ -1,5 +1,6 @@
 # 그만의 아침편지 API v2
-name = "morning-letter-api"
+# 배포된 Worker 이름: backend (https://backend.mse-fe7.workers.dev)
+name = "backend"
 main = "src/index.ts"
 compatibility_date = "2024-11-28"
 compatibility_flags = ["nodejs_compat"]
@@ -26,3 +27,18 @@ CORS_ORIGIN = "https://morning-letter.vercel.app"
 # wrangler secret put GEMINI_API_KEY
 # wrangler secret put OPENAI_API_KEY
 # wrangler secret put R2_PUBLIC_URL
+
+# ==========================================
+# Cron 트리거 설정
+# ==========================================
+# 한국 시간 기준으로 설정 (UTC+9)
+# 
+# 1. RSS 뉴스 수집: 매일 오전 6시 (KST) = UTC 21:00 (전날)
+# 2. 예약 발송 체크: 매일 오전 7시 (KST) = UTC 22:00 (전날)
+# 3. 추가 발송 체크: 매 시간 정각 (백업)
+[triggers]
+crons = [
+  "0 21 * * *",   # RSS 수집: 매일 KST 오전 6시
+  "0 22 * * *",   # 예약 발송: 매일 KST 오전 7시
+  "0 * * * *"     # 시간별 체크: 매시 정각 (예약 발송 백업)
+]

@@ -8,12 +8,19 @@ import { ValidationError, NotFoundError, validateRequired } from '../lib/errors'
 
 const news = new Hono<{ Bindings: Env }>()
 
-// RSS 피드 URL
-const RSS_FEEDS: Record<string, string> = {
-  '뉴스': 'https://www.venturesquare.net/news/feed',
-  '인터뷰': 'https://www.venturesquare.net/interview/feed',
-  '스타트업가이드': 'https://www.venturesquare.net/startup_guide/feed',
-  '트렌드': 'https://www.venturesquare.net/trend/feed'
+// RSS 피드 URL (벤처스퀘어 및 주요 스타트업 매체)
+const RSS_FEEDS: Record<string, { url: string; source: string }> = {
+  // 벤처스퀘어
+  '뉴스': { url: 'https://www.venturesquare.net/news/feed', source: '벤처스퀘어' },
+  '인터뷰': { url: 'https://www.venturesquare.net/interview/feed', source: '벤처스퀘어' },
+  '스타트업가이드': { url: 'https://www.venturesquare.net/startup_guide/feed', source: '벤처스퀘어' },
+  '트렌드': { url: 'https://www.venturesquare.net/trend/feed', source: '벤처스퀘어' },
+  // 플래텀
+  '플래텀': { url: 'https://platum.kr/feed', source: '플래텀' },
+  // IT 뉴스
+  'IT뉴스': { url: 'https://feeds.feedburner.com/HighscalabilityFeed', source: 'High Scalability' },
+  // 블로터
+  '블로터': { url: 'https://www.bloter.net/feed', source: '블로터' },
 }
 
 // 뉴스 목록 조회
@@ -60,59 +67,107 @@ news.get('/', async (c) => {
 
 // RSS 뉴스 수집
 news.post('/fetch', async (c) => {
-  const { category } = await c.req.json<{ category?: string }>()
+  const { category, limit: maxItems } = await c.req.json<{ category?: string; limit?: number }>()
   const supabase = createSupabaseAdmin(c.env)
   
   const categories = category ? [category] : Object.keys(RSS_FEEDS)
-  const results: { category: string; fetched: number; error?: string }[] = []
+  const results: { category: string; source: string; fetched: number; error?: string }[] = []
+  const itemLimit = maxItems || 10
 
   for (const cat of categories) {
-    const feedUrl = RSS_FEEDS[cat]
-    if (!feedUrl) continue
+    const feedConfig = RSS_FEEDS[cat]
+    if (!feedConfig) continue
 
     try {
-      const response = await fetch(feedUrl)
+      const response = await fetch(feedConfig.url, {
+        headers: { 
+          'User-Agent': 'Mozilla/5.0 (compatible; MorningLetterBot/1.0)',
+          'Accept': 'application/rss+xml, application/xml, text/xml, */*'
+        }
+      })
+      
+      if (!response.ok) {
+        results.push({ category: cat, source: feedConfig.source, fetched: 0, error: `HTTP ${response.status}` })
+        continue
+      }
+      
       const xml = await response.text()
       
-      // 간단한 RSS 파싱
+      // RSS 파싱
       const items = parseRSS(xml)
       let fetchedCount = 0
 
-      for (const item of items.slice(0, 10)) {
-        // 중복 체크 (source_url + category)
+      for (const item of items.slice(0, itemLimit)) {
+        // URL 정규화 (쿼리스트링 제거 옵션)
+        const normalizedUrl = item.link.split('?')[0]
+        
+        // 중복 체크 (source_url)
         const { data: existing } = await supabase
           .from(TABLES.NEWS_ITEMS)
           .select('id')
-          .eq('source_url', item.link)
-          .eq('category', cat)
+          .eq('source_url', normalizedUrl)
           .single()
 
         if (!existing) {
+          // HTML 태그 제거 및 정리
+          const cleanDescription = item.description
+            .replace(/<[^>]*>/g, '')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .trim()
+            .slice(0, 500)
+
           await supabase
             .from(TABLES.NEWS_ITEMS)
             .insert({
-              source_url: item.link,
-              source_name: '벤처스퀘어',
+              source_url: normalizedUrl,
+              source_name: feedConfig.source,
               title: item.title,
-              original_summary: item.description,
+              original_summary: cleanDescription,
               thumbnail_url: item.thumbnail,
               category: cat,
-              published_at: item.pubDate
+              published_at: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString()
             })
           fetchedCount++
         }
       }
 
-      results.push({ category: cat, fetched: fetchedCount })
+      results.push({ category: cat, source: feedConfig.source, fetched: fetchedCount })
     } catch (err) {
-      results.push({ category: cat, fetched: 0, error: String(err) })
+      results.push({ category: cat, source: feedConfig.source, fetched: 0, error: String(err) })
     }
   }
 
+  const totalFetched = results.reduce((sum, r) => sum + r.fetched, 0)
+
   return c.json<ApiResponse>({
     success: true,
-    data: { results },
-    message: `뉴스 수집 완료: ${results.reduce((sum, r) => sum + r.fetched, 0)}개`
+    data: { 
+      results,
+      summary: {
+        totalCategories: categories.length,
+        totalFetched,
+        timestamp: new Date().toISOString()
+      }
+    },
+    message: `뉴스 수집 완료: ${totalFetched}개`
+  })
+})
+
+// RSS 피드 목록 조회
+news.get('/feeds', async (c) => {
+  const feeds = Object.entries(RSS_FEEDS).map(([category, config]) => ({
+    category,
+    source: config.source,
+    url: config.url
+  }))
+
+  return c.json<ApiResponse>({
+    success: true,
+    data: { feeds }
   })
 })
 
