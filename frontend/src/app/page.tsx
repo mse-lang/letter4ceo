@@ -119,10 +119,10 @@ export default async function HomePage() {
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-[#8A373F]/20 pb-6">
           <div>
             <h2 className="text-4xl font-serif font-bold text-[#3A3A3A] mb-3">
-              Recent Letters
+              지난 편지들
             </h2>
             <p className="text-[#6B7280] font-light text-lg">
-              지나간 편지 속에 담긴 변하지 않는 가치
+              수많은 CEO들에게 영감을 준 편지들을 만나보세요.
             </p>
           </div>
           <Link
