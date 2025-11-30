@@ -18,7 +18,7 @@
 ## 🌐 배포 정보
 
 ### 프로덕션 URL
-- **Frontend**: https://letter4ceo.vercel.app
+- **Frontend**: https://letter4ceo.vercel.app (공식 도메인: https://letter4ceo.com)
 - **Backend API**: https://backend.mse-fe7.workers.dev
 - **GitHub**: https://github.com/mse-lang/letter4ceo
 

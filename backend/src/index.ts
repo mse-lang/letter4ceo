@@ -35,7 +35,17 @@ app.use('*', cors({
     }
     // 프로덕션 환경
     const allowedOrigin = c.env.CORS_ORIGIN || 'https://morning-letter.vercel.app'
-    if (origin === allowedOrigin || origin?.endsWith('.vercel.app')) {
+    const allowedDomains = [
+      'https://letter4ceo.com', 
+      'https://www.letter4ceo.com', 
+      'https://letter4ceo.vercel.app'
+    ]
+    
+    if (
+      origin === allowedOrigin || 
+      origin?.endsWith('.vercel.app') || 
+      (origin && allowedDomains.includes(origin))
+    ) {
       return origin
     }
     return allowedOrigin
