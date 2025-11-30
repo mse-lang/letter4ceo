@@ -3,16 +3,17 @@
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 
-interface Newsletter {
-  id: string
-  title: string
-  letter_body: string
-  curator_note: string
-  status: 'draft' | 'sent' | 'scheduled'
-  published_date: string
-  scheduled_at: string | null
-}
+// TipTap 에디터는 클라이언트에서만 로드
+const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), {
+  ssr: false,
+  loading: () => (
+    <div className="border border-gray-300 rounded-lg p-4 min-h-[400px] flex items-center justify-center">
+      <div className="animate-pulse text-gray-400">에디터 로딩 중...</div>
+    </div>
+  )
+})
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -27,6 +28,8 @@ export default function EditorPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const [testSending, setTestSending] = useState(false)
+  const [activeTab, setActiveTab] = useState<'editor' | 'html'>('editor')
 
   const [title, setTitle] = useState('')
   const [letterBody, setLetterBody] = useState('')
@@ -174,6 +177,40 @@ export default function EditorPage({ params }: PageProps) {
     }
   }
 
+  const handleTestSend = async () => {
+    if (isNew) {
+      alert('먼저 저장해주세요.')
+      return
+    }
+
+    const testEmail = prompt('테스트 발송할 이메일 주소를 입력하세요:')
+    if (!testEmail) return
+
+    setTestSending(true)
+    try {
+      // 먼저 저장
+      await handleSave()
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/newsletters/${id}/send-test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: testEmail })
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        alert(`테스트 이메일이 ${testEmail}로 발송되었습니다!`)
+      } else {
+        alert(data.error || '테스트 발송에 실패했습니다.')
+      }
+    } catch (error) {
+      alert('오류가 발생했습니다.')
+    } finally {
+      setTestSending(false)
+    }
+  }
+
   const handlePreview = () => {
     if (isNew) {
       alert('먼저 저장해주세요.')
@@ -226,27 +263,34 @@ export default function EditorPage({ params }: PageProps) {
               onClick={handlePreview}
               className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
             >
-              미리보기
+              👁️ 미리보기
+            </button>
+            <button
+              onClick={handleTestSend}
+              disabled={testSending || isNew}
+              className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors disabled:opacity-50"
+            >
+              {testSending ? '발송 중...' : '📧 테스트'}
             </button>
             <button
               onClick={handleSave}
               disabled={saving || status === 'sent'}
               className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
             >
-              {saving ? '저장 중...' : '저장'}
+              {saving ? '저장 중...' : '💾 저장'}
             </button>
             <button
               onClick={handleSend}
               disabled={status === 'sent'}
               className="px-4 py-2 bg-[#8A373F] text-white rounded-lg hover:bg-[#722D34] transition-colors disabled:opacity-50"
             >
-              발송하기
+              🚀 발송하기
             </button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Meta Info */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <div className="grid md:grid-cols-2 gap-4">
@@ -262,6 +306,20 @@ export default function EditorPage({ params }: PageProps) {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8A373F] focus:border-transparent outline-none disabled:bg-gray-100"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                상태
+              </label>
+              <div className="flex items-center gap-2 h-[42px]">
+                <span className={`px-3 py-1 rounded-full text-sm ${
+                  status === 'draft' ? 'bg-gray-200 text-gray-700' :
+                  status === 'sent' ? 'bg-green-100 text-green-800' :
+                  'bg-blue-100 text-blue-800'
+                }`}>
+                  {status === 'draft' ? '📝 초안' : status === 'sent' ? '✅ 발송완료' : '⏰ 예약됨'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -273,7 +331,7 @@ export default function EditorPage({ params }: PageProps) {
               제목
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-gray-400 text-sm">[그만의 아침편지]</span>
+              <span className="text-gray-400 text-sm whitespace-nowrap">[그만의 아침편지]</span>
               <input
                 type="text"
                 value={title}
@@ -285,25 +343,55 @@ export default function EditorPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Body */}
+          {/* Body - Tab 전환 */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              본문 (HTML 지원)
-            </label>
-            <textarea
-              value={letterBody}
-              onChange={(e) => setLetterBody(e.target.value)}
-              placeholder="<p>안녕하세요, 창업가 여러분.</p>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                본문
+              </label>
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setActiveTab('editor')}
+                  className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                    activeTab === 'editor' 
+                      ? 'bg-white text-gray-800 shadow-sm' 
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  ✏️ 에디터
+                </button>
+                <button
+                  onClick={() => setActiveTab('html')}
+                  className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                    activeTab === 'html' 
+                      ? 'bg-white text-gray-800 shadow-sm' 
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  &lt;/&gt; HTML
+                </button>
+              </div>
+            </div>
+
+            {activeTab === 'editor' ? (
+              <RichTextEditor
+                content={letterBody}
+                onChange={setLetterBody}
+                placeholder="아침편지 내용을 작성하세요..."
+              />
+            ) : (
+              <textarea
+                value={letterBody}
+                onChange={(e) => setLetterBody(e.target.value)}
+                placeholder="<p>안녕하세요, 창업가 여러분.</p>
 
 <p>오늘 아침은 어떠신가요?</p>
 
 <p>...</p>"
-              disabled={status === 'sent'}
-              className="w-full h-96 px-4 py-3 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-[#8A373F] focus:border-transparent outline-none resize-y disabled:bg-gray-100"
-            />
-            <p className="mt-2 text-sm text-gray-500">
-              HTML 태그를 사용할 수 있습니다. (예: &lt;p&gt;, &lt;strong&gt;, &lt;a href="..."&gt;)
-            </p>
+                disabled={status === 'sent'}
+                className="w-full h-96 px-4 py-3 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-[#8A373F] focus:border-transparent outline-none resize-y disabled:bg-gray-100"
+              />
+            )}
           </div>
 
           {/* Curator Note */}
@@ -325,10 +413,11 @@ export default function EditorPage({ params }: PageProps) {
         <div className="mt-6 bg-blue-50 rounded-xl p-6">
           <h3 className="font-bold text-blue-800 mb-2">💡 작성 팁</h3>
           <ul className="text-sm text-blue-700 space-y-1">
-            <li>• <strong>AI 생성</strong> 버튼으로 초안을 만들고 수정해보세요.</li>
-            <li>• <strong>미리보기</strong>로 실제 이메일 모습을 확인할 수 있습니다.</li>
-            <li>• <strong>저장</strong> 후에 <strong>발송하기</strong>를 눌러야 구독자에게 발송됩니다.</li>
-            <li>• 발송된 편지는 수정할 수 없으니 미리보기로 꼭 확인해주세요.</li>
+            <li>• <strong>✨ AI 생성</strong>으로 초안을 만들고 WYSIWYG 에디터로 수정하세요.</li>
+            <li>• <strong>📧 테스트</strong> 버튼으로 자신의 이메일에 미리 발송해볼 수 있습니다.</li>
+            <li>• <strong>👁️ 미리보기</strong>로 실제 이메일 모습을 확인할 수 있습니다.</li>
+            <li>• <strong>&lt;/&gt; HTML</strong> 탭에서 직접 HTML 코드를 편집할 수 있습니다.</li>
+            <li>• 발송된 편지는 수정할 수 없으니 테스트로 꼭 확인해주세요.</li>
           </ul>
         </div>
       </div>
