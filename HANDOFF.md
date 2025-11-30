@@ -305,21 +305,29 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
 
 ## 🔧 미완료/개선 필요 사항
 
+### ✅ 완료된 중간 우선순위 기능
+1. **관리자 인증 강화** ✅ 완료
+   - Supabase Auth 기반 로그인
+   - 허용된 이메일만 접근 가능 (mse@venturesquare.net, letter4ceo@letter4ceo.com)
+   - 보호된 라우트 적용 (/admin/*)
+
+2. **RSS 뉴스 자동 수집** ✅ 완료
+   - Cron 트리거 설정 (KST 06:00 수집)
+   - 벤처스퀘어, 플래텀 RSS 피드 파싱
+
+3. **WYSIWYG 에디터** ✅ 완료
+   - TipTap v3 통합
+   - 풀 툴바 (텍스트 스타일, 헤딩, 리스트, 정렬, 링크/이미지, 형광펜, 색상)
+   - 에디터/HTML 탭 전환
+   - 테스트 발송 버튼
+
 ### 🟡 Medium Priority
-1. **관리자 인증 강화**
-   - 현재: 간단한 비밀번호 (sessionStorage)
-   - 권장: Supabase Auth JWT
-
-2. **RSS 뉴스 자동 수집**
-   - Cron 트리거 설정
-   - RSS 피드 파싱
-
-3. **WYSIWYG 에디터**
-   - 현재: textarea
-   - 권장: TipTap 또는 Lexical
-
-4. **Stibee AUTO_EMAIL_URL 설정**
+1. **Stibee AUTO_EMAIL_URL 설정**
    - 테스트 발송 활성화용
+
+2. **Vercel 배포**
+   - 현재: 로컬/샌드박스 빌드 확인됨
+   - 필요: Vercel 대시보드에서 GitHub 연동 배포
 
 ### 🟢 Low Priority
 1. 이미지 최적화 (WebP 변환)
@@ -343,6 +351,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
 ### Cloudflare
 - **Worker**: `backend` @ `backend.mse-fe7.workers.dev`
 - **R2 Public URL**: `https://pub-64497d68ae64444487a0ced1964ebe68.r2.dev`
+- **Cron 트리거**: 
+  - `0 21 * * *` - RSS 수집 (KST 06:00)
+  - `0 22 * * *` - 예약 발송 (KST 07:00)
+  - `0 * * * *` - 시간별 백업 체크
 
 ---
 
@@ -383,4 +395,5 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
 ---
 
 *마지막 업데이트: 2025-11-30*
-*배포 완료: Backend (Cloudflare Workers)*
+*배포 완료: Backend (Cloudflare Workers) + Cron 트리거*
+*Vercel 배포 대기: VERCEL_DEPLOY_GUIDE.md 참조*
