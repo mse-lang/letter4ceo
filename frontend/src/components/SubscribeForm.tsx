@@ -8,6 +8,10 @@ import { PRIVACY_CONTENT } from '@/data/policies'
 export function SubscribeForm() {
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [company, setCompany] = useState('')
+  const [position, setPosition] = useState('')
+  
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [showNameField, setShowNameField] = useState(false)
@@ -28,6 +32,9 @@ export function SubscribeForm() {
       const response = await subscriberApi.subscribe({
         email,
         name: name || undefined,
+        phone: phone || undefined,
+        company: company || undefined,
+        position: position || undefined,
         privacy_agreed: true
       })
 
@@ -35,6 +42,9 @@ export function SubscribeForm() {
         setMessage({ type: 'success', text: '구독해 주셔서 감사합니다! 환영합니다. 🎉' })
         setEmail('')
         setName('')
+        setPhone('')
+        setCompany('')
+        setPosition('')
         setShowNameField(false)
       }
     } catch (error: any) {
@@ -60,24 +70,54 @@ export function SubscribeForm() {
             />
             
             {showNameField && (
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="이름 (선택)"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-[#3A3A3A] placeholder-gray-400 focus:outline-none focus:border-[#8A373F] focus:ring-1 focus:ring-[#8A373F] transition-colors"
-                disabled={isLoading}
-              />
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="이름"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-[#3A3A3A] placeholder-gray-400 focus:outline-none focus:border-[#8A373F] focus:ring-1 focus:ring-[#8A373F] transition-colors"
+                  disabled={isLoading}
+                />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="전화번호"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-[#3A3A3A] placeholder-gray-400 focus:outline-none focus:border-[#8A373F] focus:ring-1 focus:ring-[#8A373F] transition-colors"
+                  disabled={isLoading}
+                />
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    placeholder="소속 (회사명)"
+                    className="flex-1 px-4 py-3 rounded-lg border border-gray-300 bg-white text-[#3A3A3A] placeholder-gray-400 focus:outline-none focus:border-[#8A373F] focus:ring-1 focus:ring-[#8A373F] transition-colors"
+                    disabled={isLoading}
+                  />
+                  <input
+                    type="text"
+                    value={position}
+                    onChange={(e) => setPosition(e.target.value)}
+                    placeholder="직책"
+                    className="flex-1 px-4 py-3 rounded-lg border border-gray-300 bg-white text-[#3A3A3A] placeholder-gray-400 focus:outline-none focus:border-[#8A373F] focus:ring-1 focus:ring-[#8A373F] transition-colors"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
             )}
           </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="h-[50px] px-8 py-3 bg-[#8A373F] text-white font-medium rounded-lg hover:bg-[#722D34] transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-sm whitespace-nowrap"
-          >
-            {isLoading ? '처리 중...' : '구독하기'}
-          </button>
+          <div className="flex flex-col justify-start">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="h-[50px] px-8 py-3 bg-[#8A373F] text-white font-medium rounded-lg hover:bg-[#722D34] transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-sm whitespace-nowrap"
+            >
+              {isLoading ? '처리 중...' : '구독하기'}
+            </button>
+          </div>
         </div>
 
         {!showNameField && (
@@ -86,7 +126,7 @@ export function SubscribeForm() {
             onClick={() => setShowNameField(true)}
             className="text-xs text-[#6B7280] hover:text-[#8A373F] transition-colors flex items-center gap-1 ml-1"
           >
-            <span className="text-lg leading-none">+</span> 이름도 함께 등록하기
+            <span className="text-lg leading-none">+</span> 추가 정보를 등록하시면 더 의미 있는 내용을 보실 수 있습니다
           </button>
         )}
 
@@ -110,4 +150,3 @@ export function SubscribeForm() {
     </>
   )
 }
-

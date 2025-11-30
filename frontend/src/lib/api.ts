@@ -97,7 +97,7 @@ export const subscriberApi = {
   list: (params?: { status?: string; search?: string; page?: number; limit?: number }) =>
     api.get('/subscribers', { params }),
   
-  subscribe: (data: { email: string; name?: string; privacy_agreed: boolean }) =>
+  subscribe: (data: { email: string; name?: string; phone?: string; company?: string; position?: string; privacy_agreed: boolean }) =>
     api.post('/subscribers/subscribe', data),
   
   unsubscribe: (email: string) =>
