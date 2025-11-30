@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Subscriber {
   id: string
@@ -21,7 +22,7 @@ interface Stats {
 
 export default function SubscribersPage() {
   const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { user, loading: authLoading, isAdmin } = useAuth()
   const [loading, setLoading] = useState(true)
   
   const [subscribers, setSubscribers] = useState<Subscriber[]>([])
@@ -31,14 +32,14 @@ export default function SubscribersPage() {
   const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
-    const auth = sessionStorage.getItem('admin_auth')
-    if (auth !== 'true') {
-      router.push('/admin')
-      return
+    if (!authLoading) {
+      if (!user || !isAdmin) {
+        router.push('/admin/login')
+        return
+      }
+      fetchData()
     }
-    setIsAuthenticated(true)
-    fetchData()
-  }, [router])
+  }, [user, authLoading, isAdmin, router])
 
   const fetchData = async () => {
     setLoading(true)
@@ -68,11 +69,11 @@ export default function SubscribersPage() {
   }
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (user && isAdmin) {
       const timer = setTimeout(fetchData, 300)
       return () => clearTimeout(timer)
     }
-  }, [search, statusFilter, isAuthenticated])
+  }, [search, statusFilter, user, isAdmin])
 
   const handleDelete = async (id: string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return
@@ -131,8 +132,16 @@ export default function SubscribersPage() {
     })
   }
 
-  if (!isAuthenticated) {
-    return null
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="animate-spin w-8 h-8 border-4 border-[#8A373F] border-t-transparent rounded-full"></div>
+      </div>
+    )
+  }
+
+  if (!user || !isAdmin) {
+    return null // useEffect에서 리다이렉트됨
   }
 
   return (

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Newsletter {
   id: string
@@ -20,40 +21,25 @@ interface Stats {
 
 export default function AdminDashboard() {
   const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
+  const { user, loading: authLoading, signOut, isAdmin } = useAuth()
   
   const [stats, setStats] = useState<Stats | null>(null)
   const [newsletters, setNewsletters] = useState<Newsletter[]>([])
   const [activeTab, setActiveTab] = useState<'all' | 'draft' | 'sent' | 'scheduled'>('all')
+  const [dataLoading, setDataLoading] = useState(true)
 
+  // 인증 확인 및 리다이렉트
   useEffect(() => {
-    const auth = sessionStorage.getItem('admin_auth')
-    if (auth === 'true') {
-      setIsAuthenticated(true)
-      fetchData()
+    if (!authLoading) {
+      if (!user) {
+        router.push('/admin/login')
+      } else if (!isAdmin) {
+        router.push('/admin/login')
+      } else {
+        fetchData()
+      }
     }
-    setLoading(false)
-  }, [])
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    // 간단한 비밀번호 인증 (실제 환경에서는 서버 인증 필요)
-    if (password === 'letter4ceo2024') {
-      sessionStorage.setItem('admin_auth', 'true')
-      setIsAuthenticated(true)
-      fetchData()
-    } else {
-      setError('비밀번호가 올바르지 않습니다.')
-    }
-  }
-
-  const handleLogout = () => {
-    sessionStorage.removeItem('admin_auth')
-    setIsAuthenticated(false)
-  }
+  }, [user, authLoading, isAdmin, router])
 
   const fetchData = async () => {
     try {
@@ -76,6 +62,8 @@ export default function AdminDashboard() {
       setNewsletters(newsletterList.data?.newsletters || [])
     } catch (error) {
       console.error('Failed to fetch data:', error)
+    } finally {
+      setDataLoading(false)
     }
   }
 
@@ -112,6 +100,11 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleLogout = async () => {
+    await signOut()
+    router.push('/admin/login')
+  }
+
   const filteredNewsletters = activeTab === 'all' 
     ? newsletters 
     : newsletters.filter(n => n.status === activeTab)
@@ -124,57 +117,21 @@ export default function AdminDashboard() {
     })
   }
 
-  if (loading) {
+  // 로딩 중
+  if (authLoading || dataLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-[#8A373F] border-t-transparent rounded-full"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin w-10 h-10 border-4 border-[#8A373F] border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
+        </div>
       </div>
     )
   }
 
-  if (!isAuthenticated) {
-    return (
-      <main className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8">
-          <div className="text-center mb-8">
-            <span className="text-4xl">🔐</span>
-            <h1 className="text-2xl font-bold text-gray-800 mt-4">관리자 로그인</h1>
-            <p className="text-gray-600 mt-2">그만의 아침편지 관리자 페이지</p>
-          </div>
-
-          <form onSubmit={handleLogin}>
-            <div className="mb-4">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                비밀번호
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8A373F] focus:border-transparent outline-none"
-                placeholder="관리자 비밀번호"
-              />
-            </div>
-
-            {error && (
-              <p className="text-red-500 text-sm mb-4">{error}</p>
-            )}
-
-            <button
-              type="submit"
-              className="w-full py-3 bg-[#8A373F] text-white rounded-lg hover:bg-[#722D34] transition-colors"
-            >
-              로그인
-            </button>
-          </form>
-
-          <Link href="/" className="block text-center mt-6 text-gray-500 hover:text-gray-700 text-sm">
-            ← 홈으로 돌아가기
-          </Link>
-        </div>
-      </main>
-    )
+  // 비로그인 또는 비관리자
+  if (!user || !isAdmin) {
+    return null // useEffect에서 리다이렉트됨
   }
 
   return (
@@ -191,6 +148,7 @@ export default function AdminDashboard() {
             <span className="text-gray-600 font-medium">관리자</span>
           </div>
           <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-500">{user.email}</span>
             <Link
               href="/admin/subscribers"
               className="text-gray-600 hover:text-gray-900"

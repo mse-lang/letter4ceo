@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import { useAuth } from '@/contexts/AuthContext'
 
 // TipTap 에디터는 클라이언트에서만 로드
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), {
@@ -22,9 +23,9 @@ interface PageProps {
 export default function EditorPage({ params }: PageProps) {
   const { id } = use(params)
   const router = useRouter()
+  const { user, loading: authLoading, isAdmin } = useAuth()
   const isNew = id === 'new'
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [generating, setGenerating] = useState(false)
@@ -37,20 +38,21 @@ export default function EditorPage({ params }: PageProps) {
   const [publishedDate, setPublishedDate] = useState(new Date().toISOString().split('T')[0])
   const [status, setStatus] = useState<'draft' | 'sent' | 'scheduled'>('draft')
 
+  // 인증 확인
   useEffect(() => {
-    const auth = sessionStorage.getItem('admin_auth')
-    if (auth !== 'true') {
-      router.push('/admin')
-      return
-    }
-    setIsAuthenticated(true)
+    if (!authLoading) {
+      if (!user || !isAdmin) {
+        router.push('/admin/login')
+        return
+      }
 
-    if (!isNew) {
-      fetchNewsletter()
-    } else {
-      setLoading(false)
+      if (!isNew) {
+        fetchNewsletter()
+      } else {
+        setLoading(false)
+      }
     }
-  }, [id, isNew, router])
+  }, [user, authLoading, isAdmin, id, isNew, router])
 
   const fetchNewsletter = async () => {
     try {
@@ -219,12 +221,16 @@ export default function EditorPage({ params }: PageProps) {
     window.open(`${process.env.NEXT_PUBLIC_API_URL}/api/newsletters/${id}/preview`, '_blank')
   }
 
-  if (!isAuthenticated || loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-[#8A373F] border-t-transparent rounded-full"></div>
       </div>
     )
+  }
+
+  if (!user || !isAdmin) {
+    return null // useEffect에서 리다이렉트됨
   }
 
   return (
