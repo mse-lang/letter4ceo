@@ -39,7 +39,7 @@ export default async function HomePage() {
         <div 
           className="absolute inset-0 bg-cover bg-center z-0 transform scale-105" 
           style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80')",
+            backgroundImage: "url('/images/hero-bg.jpg')",
             filter: "brightness(0.8)"
           }}
         ></div>
