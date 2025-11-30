@@ -44,10 +44,10 @@ export default function ArchivePage() {
       <header className="bg-white/80 backdrop-blur-sm border-b border-[#E5E5E5] sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 bg-[#8A373F] text-white rounded-md flex items-center justify-center transform rotate-45 group-hover:rotate-0 transition-transform duration-300">
-              <span className="text-lg -rotate-45 group-hover:rotate-0 font-serif">M</span>
-            </div>
-            <span className="font-serif font-bold text-[#3A3A3A] text-lg tracking-tight">그만의 아침편지</span>
+             <div className="w-10 opacity-90 group-hover:opacity-100 transition-opacity">
+               <img src="https://www.genspark.ai/api/files/s/N36trz0v" alt="그만의 아침편지" className="w-full h-auto" />
+             </div>
+            <span className="font-serif font-bold text-[#3A3A3A] text-lg tracking-tight mt-1">그만의 아침편지</span>
           </Link>
         </div>
       </header>
@@ -142,8 +142,8 @@ export default function ArchivePage() {
       {/* Footer */}
       <footer className="bg-white border-t border-[#E5E5E5] py-12 px-4 mt-auto">
         <div className="max-w-4xl mx-auto text-center space-y-6">
-          <div className="text-[#8A373F] font-serif font-bold text-xl">
-            그만의 아침편지
+          <div className="w-20 mx-auto opacity-80 grayscale hover:grayscale-0 transition-all duration-300">
+             <img src="https://www.genspark.ai/api/files/s/N36trz0v" alt="그만의 아침편지" className="w-full h-auto" />
           </div>
           
           <div className="flex justify-center gap-8 text-sm text-[#6B7280]">

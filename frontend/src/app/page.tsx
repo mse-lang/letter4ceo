@@ -37,17 +37,17 @@ export default async function HomePage() {
       <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
         {/* Background Image */}
         <div 
-          className="absolute inset-0 bg-cover bg-center z-0" 
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80')" }}
+          className="absolute inset-0 bg-cover bg-center z-0 bg-hero-pattern"
+          style={{ backgroundImage: "url('https://www.genspark.ai/api/files/s/k3dEEpTL')" }}
         ></div>
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/40 z-10"></div>
         
         {/* Content */}
         <div className="relative z-20 text-center text-white space-y-8 px-4 max-w-4xl mx-auto">
-          {/* Logo Placeholder */}
-          <div className="w-16 h-16 mx-auto bg-white/90 text-[#8A373F] rounded-tl-2xl rounded-br-2xl shadow-lg flex items-center justify-center transform rotate-45 mb-8">
-            <span className="text-3xl -rotate-45 font-serif">M</span>
+          {/* Logo */}
+          <div className="w-32 mx-auto mb-8 drop-shadow-lg">
+            <img src="https://www.genspark.ai/api/files/s/N36trz0v" alt="그만의 아침편지 로고" className="w-full h-auto" />
           </div>
 
           <h1 className="text-4xl md:text-6xl font-playfair font-bold tracking-wide leading-tight drop-shadow-md">
@@ -63,7 +63,7 @@ export default async function HomePage() {
 
       {/* Subscription Section */}
       <section className="relative -mt-16 z-30 px-4">
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-[#8A373F]/10">
+        <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-8 md:p-12 border border-[#8A373F]/10">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-serif font-semibold text-[#8A373F] mb-3">
               매일 아침, 성장의 인사이트를 받아보세요.
@@ -99,7 +99,7 @@ export default async function HomePage() {
               <NewsletterCard key={newsletter.id} newsletter={newsletter} />
             ))
           ) : (
-            <div className="col-span-2 text-center py-12 text-[#A4B0BE] font-serif italic">
+            <div className="col-span-2 text-center py-12 text-[#A4B0BE] font-serif italic bg-white rounded-xl shadow-sm border border-gray-100">
               아직 발송된 편지가 없습니다.
             </div>
           )}
@@ -118,8 +118,8 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="bg-white border-t border-[#E5E5E5] py-12 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-6">
-          <div className="text-[#8A373F] font-serif font-bold text-xl">
-            그만의 아침편지
+          <div className="w-24 mx-auto opacity-80 grayscale hover:grayscale-0 transition-all duration-300">
+             <img src="https://www.genspark.ai/api/files/s/N36trz0v" alt="그만의 아침편지" className="w-full h-auto" />
           </div>
           
           <div className="flex justify-center gap-8 text-sm text-[#6B7280]">
