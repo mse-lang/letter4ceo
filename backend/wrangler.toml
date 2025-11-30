@@ -1,0 +1,28 @@
+# 그만의 아침편지 API v2
+name = "morning-letter-api"
+main = "src/index.ts"
+compatibility_date = "2024-11-28"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare R2 (이미지 저장소)
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "morning-letter-images"
+
+# KV (세션 저장소 - 필요시)
+# [[kv_namespaces]]
+# binding = "SESSION_KV"
+# id = "your-kv-id"
+
+# 환경변수 (Secrets는 wrangler secret으로 설정)
+[vars]
+CORS_ORIGIN = "https://morning-letter.vercel.app"
+
+# wrangler secret put SUPABASE_URL
+# wrangler secret put SUPABASE_ANON_KEY
+# wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+# wrangler secret put STIBEE_API_KEY
+# wrangler secret put STIBEE_LIST_ID
+# wrangler secret put GEMINI_API_KEY
+# wrangler secret put OPENAI_API_KEY
+# wrangler secret put R2_PUBLIC_URL

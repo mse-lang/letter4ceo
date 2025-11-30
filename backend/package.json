@@ -1,0 +1,24 @@
+{
+  "name": "morning-letter-api",
+  "version": "2.0.0",
+  "description": "그만의 아침편지 API Server",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "dev:local": "wrangler dev --local",
+    "build": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "cf-typegen": "wrangler types",
+    "db:migrate": "wrangler d1 migrations apply morning-letter-db",
+    "db:migrate:local": "wrangler d1 migrations apply morning-letter-db --local"
+  },
+  "dependencies": {
+    "hono": "^4.6.0",
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "wrangler": "^3.91.0",
+    "typescript": "^5.0.0"
+  }
+}
