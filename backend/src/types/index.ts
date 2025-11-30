@@ -19,6 +19,7 @@ export interface Env {
   // Stibee
   STIBEE_API_KEY: string
   STIBEE_LIST_ID: string
+  STIBEE_SENDER_EMAIL: string
   STIBEE_AUTO_EMAIL_URL?: string
   
   // AI
