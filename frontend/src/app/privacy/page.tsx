@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Footer from '@/components/Footer'
 
 export const metadata = {
   title: '개인정보처리방침 | 그만의 아침편지'
@@ -8,11 +9,13 @@ export default function PrivacyPage() {
   return (
     <main className="min-h-screen bg-[#F8F5F0]">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl">☕</span>
-            <span className="font-bold text-[#8A373F]">그만의 아침편지</span>
+      <header className="bg-white/80 backdrop-blur-sm border-b border-[#E5E5E5] sticky top-0 z-20">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 relative transition-transform duration-300 group-hover:scale-105">
+              <img src="/images/main-logo.png" alt="그만의 아침편지" className="w-full h-full object-contain" />
+            </div>
+            <span className="font-serif font-bold text-[#3A3A3A] text-lg tracking-tight mt-1">그만의 아침편지</span>
           </Link>
         </div>
       </header>
@@ -111,18 +114,7 @@ export default function PrivacyPage() {
       </div>
 
       {/* Footer */}
-      <footer className="py-8 px-4 bg-gray-900 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-gray-400 text-sm mb-4">
-            © {new Date().getFullYear()} 그만의 아침편지 by 벤처스퀘어
-          </p>
-          <div className="flex justify-center gap-6 text-sm text-gray-500">
-            <Link href="/terms" className="hover:text-white">이용약관</Link>
-            <Link href="/privacy" className="hover:text-white text-white">개인정보처리방침</Link>
-            <Link href="/unsubscribe" className="hover:text-white">구독취소</Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </main>
   )
 }

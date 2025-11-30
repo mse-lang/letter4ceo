@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Footer from '@/components/Footer'
 
 function UnsubscribeForm() {
   const searchParams = useSearchParams()
@@ -145,11 +146,13 @@ export default function UnsubscribePage() {
   return (
     <main className="min-h-screen bg-[#F8F5F0] flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl">☕</span>
-            <span className="font-bold text-[#8A373F]">그만의 아침편지</span>
+      <header className="bg-white/80 backdrop-blur-sm border-b border-[#E5E5E5] sticky top-0 z-20">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 relative transition-transform duration-300 group-hover:scale-105">
+              <img src="/images/main-logo.png" alt="그만의 아침편지" className="w-full h-full object-contain" />
+            </div>
+            <span className="font-serif font-bold text-[#3A3A3A] text-lg tracking-tight mt-1">그만의 아침편지</span>
           </Link>
         </div>
       </header>
@@ -164,9 +167,7 @@ export default function UnsubscribePage() {
       </div>
 
       {/* Footer */}
-      <footer className="py-6 px-4 text-center text-gray-500 text-sm">
-        © {new Date().getFullYear()} 그만의 아침편지 by 벤처스퀘어
-      </footer>
+      <Footer />
     </main>
   )
 }

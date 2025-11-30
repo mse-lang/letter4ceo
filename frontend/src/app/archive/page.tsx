@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Footer from '@/components/Footer'
 import { NewsletterCard } from '@/components/NewsletterCard'
 import type { Newsletter } from '@/types'
 
@@ -140,26 +141,7 @@ export default function ArchivePage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-[#E5E5E5] py-12 px-4 mt-auto">
-        <div className="max-w-4xl mx-auto text-center space-y-6">
-          <div className="flex items-center justify-center gap-2 opacity-90 grayscale hover:grayscale-0 transition-all duration-500">
-            <div className="w-8 h-8 relative">
-              <img src="/images/main-logo.png" alt="그만의 아침편지" className="w-full h-full object-contain" />
-            </div>
-            <span className="font-serif font-bold text-[#8A373F] text-lg">그만의 아침편지</span>
-          </div>
-          
-          <div className="flex justify-center gap-8 text-sm text-[#6B7280]">
-            <Link href="/terms" className="hover:text-[#3A3A3A] transition-colors">이용약관</Link>
-            <Link href="/privacy" className="hover:text-[#3A3A3A] transition-colors">개인정보처리방침</Link>
-            <Link href="/unsubscribe" className="hover:text-[#3A3A3A] transition-colors">구독취소</Link>
-          </div>
-          
-          <p className="text-[#A4B0BE] text-xs">
-            © {new Date().getFullYear()} 그만의 아침편지 by 벤처스퀘어. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   )
 }
