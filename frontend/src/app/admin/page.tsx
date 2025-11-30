@@ -141,7 +141,9 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl">☕</span>
+              <div className="w-8 h-8 relative">
+                <img src="/images/main-logo.png" alt="그만의 아침편지" className="w-full h-full object-contain" />
+              </div>
               <span className="font-bold text-[#8A373F]">그만의 아침편지</span>
             </Link>
             <span className="text-gray-400">|</span>

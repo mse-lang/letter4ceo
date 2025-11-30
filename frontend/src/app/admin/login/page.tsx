@@ -89,8 +89,8 @@ export default function AdminLoginPage() {
         {/* 로고 */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <div className="w-16 h-16 mx-auto mb-4 bg-white/10 rounded-2xl flex items-center justify-center">
-              <span className="text-3xl">☕</span>
+            <div className="w-16 h-16 mx-auto mb-4 relative">
+              <img src="/images/main-logo.png" alt="Logo" className="w-full h-full object-contain brightness-0 invert opacity-90" />
             </div>
             <h1 className="text-2xl font-bold text-white">그만의 아침편지</h1>
             <p className="text-white/60 mt-1">관리자 로그인</p>
