@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { newsletterApi, subscriberApi } from '@/lib/api'
 import { SubscribeForm } from '@/components/SubscribeForm'
 import { NewsletterCard } from '@/components/NewsletterCard'
 import type { Newsletter } from '@/types'
@@ -8,7 +7,7 @@ import type { Newsletter } from '@/types'
 async function getHomeData() {
   try {
     const [newslettersRes, statsRes] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/newsletters?status=sent&limit=3`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/newsletters?status=sent&limit=4`, {
         next: { revalidate: 60 }
       }),
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/subscribers/stats`, {
@@ -33,114 +32,105 @@ export default async function HomePage() {
   const { newsletters, subscriberCount } = await getHomeData()
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen font-sans text-[#3A3A3A]">
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-[#8A373F] to-[#722D34] text-white py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Logo */}
-          <div className="w-20 h-20 mx-auto mb-6 bg-white/10 rounded-2xl flex items-center justify-center">
-            <span className="text-4xl">☕</span>
+      <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center z-0" 
+          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80')" }}
+        ></div>
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/40 z-10"></div>
+        
+        {/* Content */}
+        <div className="relative z-20 text-center text-white space-y-8 px-4 max-w-4xl mx-auto">
+          {/* Logo Placeholder */}
+          <div className="w-16 h-16 mx-auto bg-white/90 text-[#8A373F] rounded-tl-2xl rounded-br-2xl shadow-lg flex items-center justify-center transform rotate-45 mb-8">
+            <span className="text-3xl -rotate-45 font-serif">M</span>
           </div>
-          
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            그만의 아침편지
+
+          <h1 className="text-4xl md:text-6xl font-playfair font-bold tracking-wide leading-tight drop-shadow-md">
+            You Think Big,<br />You Get Big.
           </h1>
-          <p className="text-xl md:text-2xl text-white/80 mb-8">
-            매일 아침, 창업가를 위한 따뜻한 인사이트
+          
+          <p className="text-lg md:text-xl text-white/90 font-light font-serif leading-relaxed">
+            오늘도 고독한 결단을 내리는 당신께,<br className="hidden md:block" />
+            새벽의 지혜를 전합니다.
           </p>
-          
-          <div className="flex items-center justify-center gap-2 text-white/60 text-sm mb-8">
-            <span>👥 {subscriberCount.toLocaleString()}명의 창업가가 구독 중</span>
-          </div>
-
-          {/* Subscribe Form */}
-          <div className="max-w-md mx-auto">
-            <SubscribeForm />
-          </div>
         </div>
       </section>
 
-      {/* Recent Letters */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-800">
-              최근 아침편지
+      {/* Subscription Section */}
+      <section className="relative -mt-16 z-30 px-4">
+        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-[#8A373F]/10">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-serif font-semibold text-[#8A373F] mb-3">
+              매일 아침, 성장의 인사이트를 받아보세요.
             </h2>
-            <Link
-              href="/archive"
-              className="text-[#8A373F] hover:underline font-medium"
-            >
-              전체 보기 →
-            </Link>
+            <p className="text-[#6B7280] text-sm">
+              현재 <span className="font-bold text-[#8A373F]">{subscriberCount.toLocaleString()}</span>명의 창업가가 함께하고 있습니다.
+            </p>
           </div>
-
-          <div className="grid gap-6">
-            {newsletters.length > 0 ? (
-              newsletters.map((newsletter: Newsletter) => (
-                <NewsletterCard key={newsletter.id} newsletter={newsletter} />
-              ))
-            ) : (
-              <div className="text-center py-12 text-gray-500">
-                아직 발송된 편지가 없습니다.
-              </div>
-            )}
-          </div>
+          
+          <SubscribeForm />
+          
+          <p className="text-xs text-center text-[#A4B0BE] mt-6">
+            * 스팸은 발송하지 않습니다. 언제든 구독 취소할 수 있습니다.
+          </p>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-800 text-center mb-12">
-            왜 그만의 아침편지인가요?
+      {/* Recent Letters Section */}
+      <section className="py-24 px-4 max-w-5xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-serif font-bold text-[#3A3A3A] mb-4">
+            Recent Letters
           </h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-[#FEF2F2] rounded-full flex items-center justify-center">
-                <span className="text-2xl">✍️</span>
-              </div>
-              <h3 className="font-bold text-lg mb-2">진정성 있는 편지</h3>
-              <p className="text-gray-600 text-sm">
-                20년 이상 스타트업 생태계에서 활동한 명승은 대표의 진솔한 이야기
-              </p>
+          <div className="w-12 h-1 bg-[#8A373F] mx-auto"></div>
+          <p className="text-[#6B7280] mt-4 font-light">
+            지나간 편지들도 여전히 따뜻합니다.
+          </p>
+        </div>
+
+        <div className="grid gap-8 md:grid-cols-2">
+          {newsletters.length > 0 ? (
+            newsletters.map((newsletter: Newsletter) => (
+              <NewsletterCard key={newsletter.id} newsletter={newsletter} />
+            ))
+          ) : (
+            <div className="col-span-2 text-center py-12 text-[#A4B0BE] font-serif italic">
+              아직 발송된 편지가 없습니다.
             </div>
-            
-            <div className="text-center p-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-[#FEF2F2] rounded-full flex items-center justify-center">
-                <span className="text-2xl">📰</span>
-              </div>
-              <h3 className="font-bold text-lg mb-2">엄선된 뉴스</h3>
-              <p className="text-gray-600 text-sm">
-                바쁜 창업가를 위해 꼭 알아야 할 스타트업 뉴스만 선별
-              </p>
-            </div>
-            
-            <div className="text-center p-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-[#FEF2F2] rounded-full flex items-center justify-center">
-                <span className="text-2xl">⏰</span>
-              </div>
-              <h3 className="font-bold text-lg mb-2">매일 아침 6시</h3>
-              <p className="text-gray-600 text-sm">
-                하루를 시작하는 아침, 커피 한 잔과 함께 읽는 편지
-              </p>
-            </div>
-          </div>
+          )}
+        </div>
+
+        <div className="text-center mt-12">
+          <Link
+            href="/archive"
+            className="inline-block border-b border-[#8A373F] text-[#8A373F] hover:text-[#722D34] hover:border-[#722D34] pb-1 transition-colors font-serif italic"
+          >
+            View all archive →
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 bg-gray-900 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-gray-400 text-sm mb-4">
-            © {new Date().getFullYear()} 그만의 아침편지 by 벤처스퀘어
-          </p>
-          <div className="flex justify-center gap-6 text-sm text-gray-500">
-            <Link href="/terms" className="hover:text-white">이용약관</Link>
-            <Link href="/privacy" className="hover:text-white">개인정보처리방침</Link>
-            <Link href="/unsubscribe" className="hover:text-white">구독취소</Link>
+      <footer className="bg-white border-t border-[#E5E5E5] py-12 px-4">
+        <div className="max-w-4xl mx-auto text-center space-y-6">
+          <div className="text-[#8A373F] font-serif font-bold text-xl">
+            그만의 아침편지
           </div>
+          
+          <div className="flex justify-center gap-8 text-sm text-[#6B7280]">
+            <Link href="/terms" className="hover:text-[#3A3A3A] transition-colors">이용약관</Link>
+            <Link href="/privacy" className="hover:text-[#3A3A3A] transition-colors">개인정보처리방침</Link>
+            <Link href="/unsubscribe" className="hover:text-[#3A3A3A] transition-colors">구독취소</Link>
+          </div>
+          
+          <p className="text-[#A4B0BE] text-xs">
+            © {new Date().getFullYear()} 그만의 아침편지 by 벤처스퀘어. All rights reserved.
+          </p>
         </div>
       </footer>
     </main>
