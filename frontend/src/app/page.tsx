@@ -37,24 +37,35 @@ export default async function HomePage() {
       <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
         {/* Background Image */}
         <div 
-          className="absolute inset-0 bg-cover bg-center z-0 bg-hero-pattern"
-          style={{ backgroundImage: "url('https://www.genspark.ai/api/files/s/k3dEEpTL')" }}
+          className="absolute inset-0 bg-cover bg-center z-0 transform scale-105" 
+          style={{ 
+            backgroundImage: "url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80')",
+            filter: "brightness(0.8)"
+          }}
         ></div>
         {/* Overlay */}
-        <div className="absolute inset-0 bg-black/40 z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/60 z-10"></div>
         
         {/* Content */}
         <div className="relative z-20 text-center text-white space-y-8 px-4 max-w-4xl mx-auto">
-          {/* Logo */}
-          <div className="w-32 mx-auto mb-8 drop-shadow-lg">
-            <img src="https://www.genspark.ai/api/files/s/N36trz0v" alt="그만의 아침편지 로고" className="w-full h-auto" />
+          {/* Logo Implementation (CSS) */}
+          <div className="relative w-24 h-24 mx-auto mb-10">
+            <div className="absolute inset-0 bg-[#8A373F] transform rotate-45 shadow-2xl rounded-sm flex items-center justify-center">
+               <div className="w-[90%] h-[90%] border border-white/30 flex items-center justify-center">
+                 <div className="transform -rotate-45 text-center">
+                   <div className="font-serif text-white text-xs tracking-widest mb-1 opacity-90">그만의</div>
+                   <div className="font-serif text-white font-bold text-lg tracking-widest border-b border-white/50 pb-1 mb-1">아침편지</div>
+                   <div className="font-serif text-white/70 text-[10px] tracking-widest">Dear.CEO</div>
+                 </div>
+               </div>
+            </div>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-playfair font-bold tracking-wide leading-tight drop-shadow-md">
+          <h1 className="text-4xl md:text-6xl font-playfair font-bold tracking-wide leading-tight drop-shadow-lg">
             You Think Big,<br />You Get Big.
           </h1>
           
-          <p className="text-lg md:text-xl text-white/90 font-light font-serif leading-relaxed">
+          <p className="text-lg md:text-xl text-white/90 font-light font-serif leading-relaxed drop-shadow-md">
             오늘도 고독한 결단을 내리는 당신께,<br className="hidden md:block" />
             새벽의 지혜를 전합니다.
           </p>
@@ -62,7 +73,7 @@ export default async function HomePage() {
       </section>
 
       {/* Subscription Section */}
-      <section className="relative -mt-16 z-30 px-4">
+      <section className="relative -mt-20 z-30 px-4">
         <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-8 md:p-12 border border-[#8A373F]/10">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-serif font-semibold text-[#8A373F] mb-3">
@@ -118,8 +129,9 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="bg-white border-t border-[#E5E5E5] py-12 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-6">
-          <div className="w-24 mx-auto opacity-80 grayscale hover:grayscale-0 transition-all duration-300">
-             <img src="https://www.genspark.ai/api/files/s/N36trz0v" alt="그만의 아침편지" className="w-full h-auto" />
+          <div className="flex items-center justify-center gap-2 opacity-80">
+            <div className="w-6 h-6 bg-[#8A373F] transform rotate-45"></div>
+            <span className="font-serif font-bold text-[#8A373F] text-lg">그만의 아침편지</span>
           </div>
           
           <div className="flex justify-center gap-8 text-sm text-[#6B7280]">

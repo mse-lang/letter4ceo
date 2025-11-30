@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: "#8A373F", // Deep Wine (로고 색상)
+        primary: "#8A373F", // Deep Wine
         background: "#F8F5F0", // Warm Cream
         text: "#3A3A3A", // Dark Charcoal
         secondary: "#6B7280", // Warm Gray
@@ -20,9 +20,6 @@ const config: Config = {
         sans: ["var(--font-sans)", "sans-serif"],
         playfair: ["var(--font-playfair)", "serif"],
       },
-      backgroundImage: {
-        'hero-pattern': "url('https://www.genspark.ai/api/files/s/k3dEEpTL')",
-      }
     },
   },
   plugins: [require("@tailwindcss/typography")],
